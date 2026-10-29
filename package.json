@@ -1,0 +1,16 @@
+{
+  "name": "the-last-process",
+  "version": "1.0.0",
+  "description": "A safety-first, AI-powered haunted terminal horror game for Hacktoberfest 2026",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "python -m unittest discover tests"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "express": "^5.3.0",
+    "ws": "^8.22.0"
+  }
+}

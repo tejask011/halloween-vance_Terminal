@@ -1,0 +1,254 @@
+/* CRT Retro Haunted Monitor Stylesheet */
+
+:root {
+  --primary-color: #00ff66;
+  --glow-color: rgba(0, 255, 102, 0.6);
+  --bg-color: #0a0d0a;
+  --scanline-color: rgba(0, 0, 0, 0.4);
+}
+
+body.theme-amber {
+  --primary-color: #ffb000;
+  --glow-color: rgba(255, 176, 0, 0.6);
+  --bg-color: #0d0a05;
+}
+
+body.theme-halloween {
+  --primary-color: #ff6600;
+  --glow-color: rgba(255, 102, 0, 0.7);
+  --bg-color: #0f0702;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #020202;
+  color: var(--primary-color);
+  font-family: 'Courier New', Courier, monospace;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Outer Monitor Bezel */
+.monitor-frame {
+  position: relative;
+  width: 95vw;
+  max-width: 1100px;
+  height: 90vh;
+  max-height: 800px;
+  background: #1a1a1a;
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 
+    0 0 50px rgba(0, 0, 0, 0.9),
+    inset 0 0 15px #000,
+    inset 0 0 3px #444;
+  display: flex;
+  flex-direction: column;
+}
+
+.monitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #666;
+  border-bottom: 1px solid #333;
+  padding-bottom: 8px;
+}
+
+.station-title {
+  color: var(--primary-color);
+  text-shadow: 0 0 8px var(--glow-color);
+  font-weight: bold;
+}
+
+.monitor-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-ctrl {
+  background: #222;
+  border: 1px solid #444;
+  color: #aaa;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-ctrl:hover {
+  background: #333;
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+.btn-ctrl.active {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px var(--glow-color);
+}
+
+/* CRT Screen Wrapper */
+.crt-screen-container {
+  position: relative;
+  flex: 1;
+  background: var(--bg-color);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.85);
+  border: 2px solid #222;
+}
+
+/* Scanlines and CRT Curvature Overlay */
+.crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  background: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, var(--scanline-color) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.04));
+  background-size: 100% 3px, 6px 100%;
+  opacity: 0.85;
+}
+
+/* CRT Vignette / Curved Glass Edge */
+.crt-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 11;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.85);
+}
+
+/* Ghost Canvas Overlay */
+#ghostCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* Xterm.js Host Div */
+#terminal {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  z-index: 5;
+}
+
+/* Xterm Custom Glow */
+.xterm {
+  height: 100%;
+  font-feature-settings: "liga" 0;
+  text-shadow: 0 0 4px var(--glow-color);
+}
+
+.xterm-viewport {
+  background-color: transparent !important;
+}
+
+/* Screen Shake Animation */
+.screen-shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-2px, 1px, 0); }
+  20%, 80% { transform: translate3d(3px, -2px, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 2px, 0); }
+  40%, 60% { transform: translate3d(5px, -1px, 0); }
+}
+
+/* CRT Flicker */
+@keyframes flicker {
+  0% { opacity: 0.98; }
+  50% { opacity: 1; }
+  52% { opacity: 0.92; }
+  54% { opacity: 1; }
+  80% { opacity: 0.97; }
+  100% { opacity: 1; }
+}
+
+.crt-flicker {
+  animation: flicker 0.15s infinite;
+}
+
+/* Cobwebs in corners */
+.cobweb-top-left {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 80px;
+  height: 80px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 12;
+  filter: drop-shadow(0 0 4px var(--glow-color));
+}
+
+.cobweb-top-right {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 80px;
+  height: 80px;
+  transform: scaleX(-1);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 12;
+  filter: drop-shadow(0 0 4px var(--glow-color));
+}
+
+/* Monitor bottom bezel branding */
+.monitor-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #555;
+  font-size: 11px;
+}
+
+.power-led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  box-shadow: 0 0 8px var(--primary-color);
+  margin-right: 6px;
+  animation: pulse-led 2s infinite ease-in-out;
+}
+
+@keyframes pulse-led {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; box-shadow: 0 0 12px var(--primary-color); }
+}

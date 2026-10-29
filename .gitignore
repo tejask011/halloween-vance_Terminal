@@ -1,0 +1,11 @@
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.game_data/
+*.tmp
+.env
+.venv/
+env/
+venv/

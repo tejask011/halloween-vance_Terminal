@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE LAST PROCESS • Haunted Terminal</title>
+  <link rel="stylesheet" href="/node_modules/@xterm/xterm/css/xterm.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-green">
+
+  <!-- Physical Monitor Bezel -->
+  <div class="monitor-frame">
+
+    <div class="monitor-header">
+      <div class="station-title">
+        <span class="power-led"></span>SITE 09 &bull; TERMINAL BAY 3 &bull; HEURISTIC MONITOR 0
+      </div>
+      <div class="monitor-controls">
+        <button id="btnAudio" class="btn-ctrl" title="Toggle audio hum and sound effects">AUDIO: MUTED</button>
+        <button class="btn-ctrl btn-theme active" data-theme="green">PHOSPHOR</button>
+        <button class="btn-ctrl btn-theme" data-theme="amber">AMBER</button>
+        <button class="btn-ctrl btn-theme" data-theme="halloween">🎃 HALLOWEEN</button>
+      </div>
+    </div>
+
+    <!-- Inner CRT Screen with Curved Glass & Scanlines -->
+    <div class="crt-screen-container crt-flicker">
+      
+      <!-- Halloween Cobwebs in Corners -->
+      <svg class="cobweb-top-left" viewBox="0 0 100 100">
+        <path d="M0,0 L100,0 M0,0 L80,40 M0,0 L50,70 M0,0 L0,100 M20,0 Q15,15 0,20 M50,0 Q40,35 0,50 M80,0 Q60,60 0,80" stroke="currentColor" stroke-width="1.5" fill="none" />
+      </svg>
+      <svg class="cobweb-top-right" viewBox="0 0 100 100">
+        <path d="M0,0 L100,0 M0,0 L80,40 M0,0 L50,70 M0,0 L0,100 M20,0 Q15,15 0,20 M50,0 Q40,35 0,50 M80,0 Q60,60 0,80" stroke="currentColor" stroke-width="1.5" fill="none" />
+      </svg>
+
+      <!-- Glass Vignette & Scanline Filters -->
+      <div class="crt-overlay"></div>
+      <div class="crt-vignette"></div>
+
+      <!-- Ghost Apparition Canvas -->
+      <canvas id="ghostCanvas"></canvas>
+
+      <!-- Real xterm.js Host Container -->
+      <div id="terminal"></div>
+    </div>
+
+    <!-- Monitor Bezel Branding -->
+    <div class="monitor-footer">
+      <div>MODEL: EREBOS-VT100 &bull; COGNITIVE FIRMWARE 2.40</div>
+      <div>HACKTOBERFEST 2026: GHOST IN THE MACHINE</div>
+    </div>
+  </div>
+
+  <!-- Xterm.js & Addon Fit Scripts -->
+  <script src="/node_modules/@xterm/xterm/lib/xterm.js"></script>
+  <script src="/node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+  
+  <!-- Haunted Audio & Canvas Ghost Engine -->
+  <script src="ghost_fx.js"></script>
+  <script src="audio_fx.js"></script>
+  <script src="terminal.js"></script>
+</body>
+</html>
