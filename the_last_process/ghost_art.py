@@ -123,3 +123,4 @@ def play_skull_glitch(console, theme_color="red", loops=3, delay=0.1):
             sys.stdout.flush()
     sys.stdout.write("\n" * (SKULL_FRAMES[0].count(chr(10)) + 1))
     sys.stdout.flush()
+

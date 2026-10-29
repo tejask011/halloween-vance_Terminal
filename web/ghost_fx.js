@@ -195,3 +195,4 @@ class GhostFX {
     this.ctx.restore();
   }
 }
+

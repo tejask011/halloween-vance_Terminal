@@ -515,3 +515,4 @@ class HauntedTerminal {
 window.addEventListener('DOMContentLoaded', () => {
   window.game = new HauntedTerminal();
 });
+

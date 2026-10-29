@@ -132,3 +132,4 @@ class SoundFX {
     osc.stop(this.ctx.currentTime + 1.3);
   }
 }
+
