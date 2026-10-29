@@ -1,22 +1,22 @@
-/* CRT Retro Haunted Monitor Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=VT323&display=swap');
 
 :root {
   --primary-color: #00ff66;
   --glow-color: rgba(0, 255, 102, 0.6);
-  --bg-color: #0a0d0a;
-  --scanline-color: rgba(0, 0, 0, 0.4);
+  --bg-color: #080d09;
+  --scanline-color: rgba(0, 0, 0, 0.45);
 }
 
 body.theme-amber {
-  --primary-color: #ffb000;
-  --glow-color: rgba(255, 176, 0, 0.6);
-  --bg-color: #0d0a05;
+  --primary-color: #ffaa00;
+  --glow-color: rgba(255, 170, 0, 0.65);
+  --bg-color: #0d0903;
 }
 
 body.theme-halloween {
-  --primary-color: #ff6600;
-  --glow-color: rgba(255, 102, 0, 0.7);
-  --bg-color: #0f0702;
+  --primary-color: #ff4400;
+  --glow-color: rgba(255, 68, 0, 0.75);
+  --bg-color: #100602;
 }
 
 * {
@@ -26,31 +26,238 @@ body.theme-halloween {
 }
 
 body {
-  background: #020202;
+  background: #020205;
   color: var(--primary-color);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'VT323', monospace;
   height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
-/* Outer Monitor Bezel */
+/* ==========================================================================
+   GOTHIC GRAVEYARD BACKGROUND SCENE
+   ========================================================================== */
+
+.graveyard-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(circle at 50% 15%, #180918 0%, #060209 60%, #000000 100%);
+  overflow: hidden;
+}
+
+/* Pulsing Blood Moon */
+.blood-moon {
+  position: absolute;
+  top: 40px;
+  right: 12%;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #ff5533, #8b0000 65%, #3a0000 100%);
+  box-shadow: 0 0 70px rgba(255, 50, 30, 0.7), 0 0 140px rgba(180, 0, 0, 0.4);
+  animation: pulse-moon 8s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-moon {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.04); filter: brightness(1.2); }
+}
+
+/* Gnarled Dead Tree Silhouette */
+.tree-left {
+  position: absolute;
+  bottom: 0;
+  left: -20px;
+  width: 280px;
+  height: 480px;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.tree-right {
+  position: absolute;
+  bottom: 0;
+  right: -30px;
+  width: 320px;
+  height: 520px;
+  opacity: 0.75;
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+
+/* Cemetery Tombstones at bottom */
+.tombstones-row {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 140px;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  opacity: 0.7;
+}
+
+.tombstone {
+  width: 50px;
+  height: 70px;
+  background: #141118;
+  border-radius: 24px 24px 0 0;
+  border: 1px solid #282030;
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+  position: relative;
+}
+
+.tombstone::after {
+  content: "R.I.P.";
+  position: absolute;
+  top: 14px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  color: #4a4055;
+}
+
+.tombstone.tall {
+  height: 95px;
+  width: 60px;
+}
+
+/* Dangling Animated Spider */
+.spider-container {
+  position: absolute;
+  top: 0;
+  left: 80px;
+  z-index: 20;
+  pointer-events: none;
+  animation: spider-drop 7s infinite ease-in-out alternate;
+}
+
+.spider-thread {
+  width: 1px;
+  height: 110px;
+  background: rgba(255, 255, 255, 0.4);
+  margin: 0 auto;
+}
+
+.spider-body {
+  width: 18px;
+  height: 22px;
+  background: #111;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 6px rgba(255, 0, 0, 0.5);
+}
+
+.spider-body::before, .spider-body::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #ff0000;
+  border-radius: 50%;
+  top: 6px;
+}
+
+.spider-body::before { left: 4px; }
+.spider-body::after { right: 4px; }
+
+@keyframes spider-drop {
+  0% { transform: translateY(-40px); }
+  50% { transform: translateY(35px); }
+  100% { transform: translateY(0px); }
+}
+
+/* ==========================================================================
+   FLICKERING CANDLES (LEFT & RIGHT)
+   ========================================================================== */
+
+.candle-holder {
+  position: absolute;
+  bottom: 70px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.candle-left { left: 4%; }
+.candle-right { right: 4%; }
+
+.candle-stick {
+  width: 22px;
+  height: 100px;
+  background: linear-gradient(to bottom, #d4cfb8, #8c8266);
+  border-radius: 3px 3px 0 0;
+  box-shadow: inset -4px 0 6px rgba(0,0,0,0.4);
+}
+
+.flame {
+  width: 14px;
+  height: 26px;
+  background: radial-gradient(ellipse at bottom, #fff 0%, #ffcc00 50%, #ff3300 85%, transparent 100%);
+  border-radius: 50% 50% 20% 20%;
+  filter: drop-shadow(0 0 16px #ff8800);
+  animation: flicker-flame 0.12s infinite alternate ease-in-out;
+  margin-bottom: 2px;
+}
+
+@keyframes flicker-flame {
+  0% { transform: scale(1) rotate(-1deg); opacity: 0.95; }
+  50% { transform: scale(1.08, 0.92) rotate(2deg); opacity: 1; }
+  100% { transform: scale(0.92, 1.08) rotate(-2deg); opacity: 0.88; }
+}
+
+/* ==========================================================================
+   LIGHTNING FLASH OVERLAY
+   ========================================================================== */
+
+#lightningOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+  transition: opacity 0.05s ease;
+}
+
+#lightningOverlay.flash-active {
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   HAUNTED CRT MONITOR
+   ========================================================================== */
+
 .monitor-frame {
   position: relative;
-  width: 95vw;
-  max-width: 1100px;
-  height: 90vh;
-  max-height: 800px;
-  background: #1a1a1a;
+  z-index: 10;
+  width: 92vw;
+  max-width: 1050px;
+  height: 86vh;
+  max-height: 750px;
+  background: #111114;
   border-radius: 28px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 
-    0 0 50px rgba(0, 0, 0, 0.9),
-    inset 0 0 15px #000,
-    inset 0 0 3px #444;
+    0 0 60px rgba(0, 0, 0, 0.95),
+    0 0 20px rgba(180, 0, 0, 0.3),
+    inset 0 0 20px #000,
+    inset 0 0 3px #333;
   display: flex;
   flex-direction: column;
 }
@@ -59,20 +266,20 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   padding: 0 10px;
-  font-size: 13px;
-  text-transform: uppercase;
+  font-size: 15px;
   letter-spacing: 2px;
-  color: #666;
-  border-bottom: 1px solid #333;
-  padding-bottom: 8px;
+  border-bottom: 1px solid #282030;
+  padding-bottom: 6px;
 }
 
 .station-title {
-  color: var(--primary-color);
-  text-shadow: 0 0 8px var(--glow-color);
-  font-weight: bold;
+  font-family: 'Creepster', cursive;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: #ff3322;
+  text-shadow: 0 0 10px #ff0000;
 }
 
 .monitor-controls {
@@ -81,27 +288,28 @@ body {
 }
 
 .btn-ctrl {
-  background: #222;
-  border: 1px solid #444;
-  color: #aaa;
-  padding: 4px 10px;
-  font-size: 11px;
-  font-family: inherit;
+  background: #181520;
+  border: 1px solid #3d3045;
+  color: #bbb;
+  padding: 4px 12px;
+  font-size: 14px;
+  font-family: 'VT323', monospace;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 .btn-ctrl:hover {
-  background: #333;
+  background: #2b1f35;
   color: #fff;
-  border-color: var(--primary-color);
+  border-color: #ff2200;
+  box-shadow: 0 0 8px rgba(255, 34, 0, 0.5);
 }
 
 .btn-ctrl.active {
   color: var(--primary-color);
   border-color: var(--primary-color);
-  box-shadow: 0 0 6px var(--glow-color);
+  box-shadow: 0 0 8px var(--glow-color);
 }
 
 /* CRT Screen Wrapper */
@@ -111,11 +319,10 @@ body {
   background: var(--bg-color);
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.85);
-  border: 2px solid #222;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.95);
+  border: 2px solid #201a28;
 }
 
-/* Scanlines and CRT Curvature Overlay */
 .crt-overlay {
   position: absolute;
   top: 0;
@@ -126,12 +333,11 @@ body {
   z-index: 10;
   background: 
     linear-gradient(rgba(18, 16, 16, 0) 50%, var(--scanline-color) 50%),
-    linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.04));
+    linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
   background-size: 100% 3px, 6px 100%;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
-/* CRT Vignette / Curved Glass Edge */
 .crt-vignette {
   position: absolute;
   top: 0;
@@ -140,10 +346,9 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 11;
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.9);
 }
 
-/* Ghost Canvas Overlay */
 #ghostCanvas {
   position: absolute;
   top: 0;
@@ -154,7 +359,6 @@ body {
   z-index: 8;
 }
 
-/* Xterm.js Host Div */
 #terminal {
   position: absolute;
   top: 15px;
@@ -164,11 +368,10 @@ body {
   z-index: 5;
 }
 
-/* Xterm Custom Glow */
 .xterm {
   height: 100%;
   font-feature-settings: "liga" 0;
-  text-shadow: 0 0 4px var(--glow-color);
+  text-shadow: 0 0 6px var(--glow-color);
 }
 
 .xterm-viewport {
@@ -177,79 +380,64 @@ body {
 
 /* Screen Shake Animation */
 .screen-shake {
-  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.45s cubic-bezier(.36,.07,.19,.97) both;
 }
 
 @keyframes shake {
-  10%, 90% { transform: translate3d(-2px, 1px, 0); }
-  20%, 80% { transform: translate3d(3px, -2px, 0); }
-  30%, 50%, 70% { transform: translate3d(-5px, 2px, 0); }
-  40%, 60% { transform: translate3d(5px, -1px, 0); }
-}
-
-/* CRT Flicker */
-@keyframes flicker {
-  0% { opacity: 0.98; }
-  50% { opacity: 1; }
-  52% { opacity: 0.92; }
-  54% { opacity: 1; }
-  80% { opacity: 0.97; }
-  100% { opacity: 1; }
+  10%, 90% { transform: translate3d(-3px, 2px, 0); }
+  20%, 80% { transform: translate3d(5px, -4px, 0); }
+  30%, 50%, 70% { transform: translate3d(-7px, 3px, 0); }
+  40%, 60% { transform: translate3d(7px, -2px, 0); }
 }
 
 .crt-flicker {
-  animation: flicker 0.15s infinite;
+  animation: flicker 0.12s infinite;
 }
 
-/* Cobwebs in corners */
-.cobweb-top-left {
+@keyframes flicker {
+  0% { opacity: 0.98; }
+  50% { opacity: 1; }
+  52% { opacity: 0.91; }
+  54% { opacity: 1; }
+  85% { opacity: 0.97; }
+  100% { opacity: 1; }
+}
+
+.cobweb-top-left, .cobweb-top-right {
   position: absolute;
-  top: 6px;
-  left: 6px;
-  width: 80px;
-  height: 80px;
-  opacity: 0.35;
+  top: 4px;
+  width: 90px;
+  height: 90px;
+  opacity: 0.4;
   pointer-events: none;
   z-index: 12;
-  filter: drop-shadow(0 0 4px var(--glow-color));
+  filter: drop-shadow(0 0 5px var(--glow-color));
 }
 
-.cobweb-top-right {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 80px;
-  height: 80px;
-  transform: scaleX(-1);
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: 12;
-  filter: drop-shadow(0 0 4px var(--glow-color));
-}
+.cobweb-top-left { left: 4px; }
+.cobweb-top-right { right: 4px; transform: scaleX(-1); }
 
-/* Monitor bottom bezel branding */
 .monitor-footer {
-  margin-top: 12px;
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #555;
-  font-size: 11px;
+  color: #665570;
+  font-size: 14px;
 }
 
 .power-led {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: var(--primary-color);
-  box-shadow: 0 0 8px var(--primary-color);
-  margin-right: 6px;
+  background: #ff2200;
+  box-shadow: 0 0 10px #ff2200;
+  margin-right: 8px;
   animation: pulse-led 2s infinite ease-in-out;
 }
 
 @keyframes pulse-led {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; box-shadow: 0 0 12px var(--primary-color); }
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; box-shadow: 0 0 14px #ff2200; }
 }
-

@@ -51,6 +51,7 @@ class HauntedTerminal {
     this.readHistory = [];
 
     this.initDOM();
+    this.setTheme('halloween');
     this.boot();
   }
 
@@ -333,8 +334,10 @@ class HauntedTerminal {
       if (!this.contradictionDiscovered) {
         this.contradictionDiscovered = true;
         this.suspicion += 2;
-        this.ghostFx.triggerGlitch();
-        this.soundFx.playGlitch();
+        this.soundFx.setHeartbeatRate(80);
+        this.ghostFx.triggerGlitch(true);
+        this.ghostFx.triggerLightning();
+        this.soundFx.playThunderCrash();
         this.ghostFx.spawnGhost(true);
 
         await this.typeText('SYSTEM > EVENT: Contradiction discovered between operator log and departure telemetry.', 15, '\x1b[1;31m');
@@ -343,6 +346,8 @@ class HauntedTerminal {
       }
 
     } else if (fname === 'recovery_note.txt') {
+      this.soundFx.setHeartbeatRate(100);
+      this.soundFx.playFuneralBell();
       this.term.write('\r\n\x1b[1;36m+--- RECOVERED MEMORY BUFFER ---+\x1b[0m\r\n');
       this.term.write('\x1b[33mNOTE FROM PREVIOUS OPERATOR:\r\n');
       this.term.write('If you are reading this, do not trust Entity 0.\r\n');
@@ -358,15 +363,16 @@ class HauntedTerminal {
       }
 
     } else if (fname === 'dont_read_this.txt') {
+      this.soundFx.setHeartbeatRate(125);
+      this.ghostFx.triggerJumpscare();
+      this.soundFx.playScreamingGlitch();
+
       this.term.write('\r\n\x1b[1;31m+--- UNALLOCATED MEMORY SECTOR ---+\x1b[0m\r\n');
       this.term.write('\x1b[1;31mYOU WERE NOT SUPPOSED TO FIND THIS.\r\n\r\n');
       this.term.write('The terminal has been counting how many times you inspect the logs.\r\n');
       this.term.write('You noticed the timestamps don\'t fit, didn\'t you?\r\n');
       this.term.write('He thought he was typing to a machine too.\x1b[0m\r\n');
       this.term.write('\x1b[1;31m+---------------------------------+\x1b[0m\r\n');
-
-      this.ghostFx.triggerGlitch();
-      this.soundFx.playGlitch();
 
       if (this.contradictionDiscovered && this.filesRead.has('recovery_note.txt') && !this.identityUnlocked) {
         this.identityUnlocked = true;
@@ -375,6 +381,11 @@ class HauntedTerminal {
       }
 
     } else if (fname === 'identity_record.log') {
+      this.soundFx.setHeartbeatRate(135);
+      this.ghostFx.triggerLightning();
+      this.soundFx.playFuneralBell();
+      this.ghostFx.triggerGlitch(true);
+      this.soundFx.playThunderCrash();
       this.term.write('\r\n\x1b[1;35m+================ IDENTITY RECORD LEDGER ================+\x1b[0m\r\n');
       this.term.write('PROJECT EREBOS: IDENTITY LEDGER & ARCHIVE RECOVERY\r\n');
       this.term.write('\x1b[1;31mPREVIOUS OPERATOR: ENTITY 0\x1b[0m\r\n');

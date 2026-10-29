@@ -308,8 +308,17 @@ class NodeGameSession {
     if (fname === 'departure.log' && !this.contradiction) {
       this.contradiction = true;
       this.suspicion += 2;
+      console.log(colorize('\n[THUMP... THUMP... Heartbeat accelerates: 80 BPM]', fg.red));
+      console.log(colorize('⚡ LIGHTNING FLASH: The monitor screeches in agony!', fg.yellow));
       console.log(Badge.error('CONTRADICTION DETECTED') + ' ' + colorize('Logs conflict with operator report.', fg.red));
       await this.printEntity('The clock was damaged. You should ignore those records.');
+    }
+
+    if (fname === 'dont_read_this.txt') {
+      console.log(colorize('\n+====================================================================+', fg.red));
+      console.log(colorize('|  [!] JUMPSCARE: A DEMONIC REFLECTION SHRIEKING IN THE CRT GLASS    |', fg.red));
+      console.log(colorize('+====================================================================+\n', fg.red));
+      console.log(colorize('[THUMP-THUMP-THUMP... Panic Pulse: 125 BPM]', fg.red));
     }
 
     // Handle silence suspense
@@ -432,3 +441,4 @@ class NodeGameSession {
 // Start
 const session = new NodeGameSession();
 session.boot();
+

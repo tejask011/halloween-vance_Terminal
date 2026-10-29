@@ -3,31 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>THE LAST PROCESS • Haunted Terminal</title>
+  <title>THE LAST PROCESS • Gothic Terminal Horror</title>
   <link rel="stylesheet" href="/node_modules/@xterm/xterm/css/xterm.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-green">
+<body class="theme-halloween">
 
-  <!-- Physical Monitor Bezel -->
+  <!-- Lightning Storm Flash Overlay -->
+  <div id="lightningOverlay"></div>
+
+  <!-- Atmospheric Gothic Graveyard Background -->
+  <div class="graveyard-bg">
+    <!-- Blood Moon -->
+    <div class="blood-moon"></div>
+
+    <!-- Dead Tree Silhouettes -->
+    <svg class="tree-left" viewBox="0 0 200 400">
+      <path d="M40,400 Q60,250 80,180 Q100,100 120,40 Q90,90 60,110 M80,180 Q40,140 10,120 M75,220 Q120,190 160,160 Q130,140 110,120 M60,110 Q50,70 30,50 M120,40 Q140,20 170,10" stroke="#0e0814" stroke-width="8" stroke-linecap="round" fill="none" />
+    </svg>
+    <svg class="tree-right" viewBox="0 0 200 400">
+      <path d="M40,400 Q60,250 80,180 Q100,100 120,40 Q90,90 60,110 M80,180 Q40,140 10,120 M75,220 Q120,190 160,160 Q130,140 110,120 M60,110 Q50,70 30,50 M120,40 Q140,20 170,10" stroke="#0e0814" stroke-width="8" stroke-linecap="round" fill="none" />
+    </svg>
+
+    <!-- Cemetery Headstones -->
+    <div class="tombstones-row">
+      <div class="tombstone"></div>
+      <div class="tombstone tall"></div>
+      <div class="tombstone"></div>
+      <div class="tombstone tall"></div>
+      <div class="tombstone"></div>
+    </div>
+  </div>
+
+  <!-- Dangling Spider -->
+  <div class="spider-container">
+    <div class="spider-thread"></div>
+    <div class="spider-body"></div>
+  </div>
+
+  <!-- Left Flickering Candle -->
+  <div class="candle-holder candle-left">
+    <div class="flame"></div>
+    <div class="candle-stick"></div>
+  </div>
+
+  <!-- Right Flickering Candle -->
+  <div class="candle-holder candle-right">
+    <div class="flame"></div>
+    <div class="candle-stick"></div>
+  </div>
+
+  <!-- Physical Haunted Monitor Bezel -->
   <div class="monitor-frame">
 
     <div class="monitor-header">
       <div class="station-title">
-        <span class="power-led"></span>SITE 09 &bull; TERMINAL BAY 3 &bull; HEURISTIC MONITOR 0
+        <span class="power-led"></span>THE LAST PROCESS &bull; CEMETERY BAY 3
       </div>
       <div class="monitor-controls">
-        <button id="btnAudio" class="btn-ctrl" title="Toggle audio hum and sound effects">AUDIO: MUTED</button>
-        <button class="btn-ctrl btn-theme active" data-theme="green">PHOSPHOR</button>
+        <button id="btnAudio" class="btn-ctrl" title="Toggle graveyard wind, heartbeats, and bells">AUDIO: MUTED</button>
+        <button class="btn-ctrl btn-theme active" data-theme="halloween">🎃 HALLOWEEN</button>
+        <button class="btn-ctrl btn-theme" data-theme="green">PHOSPHOR</button>
         <button class="btn-ctrl btn-theme" data-theme="amber">AMBER</button>
-        <button class="btn-ctrl btn-theme" data-theme="halloween">🎃 HALLOWEEN</button>
       </div>
     </div>
 
     <!-- Inner CRT Screen with Curved Glass & Scanlines -->
     <div class="crt-screen-container crt-flicker">
       
-      <!-- Halloween Cobwebs in Corners -->
+      <!-- Cobwebs in Corners -->
       <svg class="cobweb-top-left" viewBox="0 0 100 100">
         <path d="M0,0 L100,0 M0,0 L80,40 M0,0 L50,70 M0,0 L0,100 M20,0 Q15,15 0,20 M50,0 Q40,35 0,50 M80,0 Q60,60 0,80" stroke="currentColor" stroke-width="1.5" fill="none" />
       </svg>
@@ -39,7 +83,7 @@
       <div class="crt-overlay"></div>
       <div class="crt-vignette"></div>
 
-      <!-- Ghost Apparition Canvas -->
+      <!-- Advanced Ghost & Blood Canvas -->
       <canvas id="ghostCanvas"></canvas>
 
       <!-- Real xterm.js Host Container -->
@@ -48,7 +92,7 @@
 
     <!-- Monitor Bezel Branding -->
     <div class="monitor-footer">
-      <div>MODEL: EREBOS-VT100 &bull; COGNITIVE FIRMWARE 2.40</div>
+      <div>MEMORIAL SECTOR 09 &bull; GRAVE 23:40:00 &bull; ARTHUR VANCE</div>
       <div>HACKTOBERFEST 2026: GHOST IN THE MACHINE</div>
     </div>
   </div>
@@ -63,4 +107,3 @@
   <script src="terminal.js"></script>
 </body>
 </html>
-
