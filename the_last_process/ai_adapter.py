@@ -114,7 +114,23 @@ class AIAdapter:
                 "ENTITY 0 > Will you leave me here again?"
             )
 
-        # 2. Contradiction confronted
+        # 2. Player asks what the game is / what to do / how to play
+        if any(w in query for w in ["what to do", "what do i do", "what should i do", "what can i do", "what is this game", "what is this", "how to play", "how do i play", "what i need", "help me", "objective", "guide"]):
+            return (
+                "ENTITY 0 > You are the new operator at Terminal Bay 3.\n"
+                "ENTITY 0 > Arthur Vance logged that I was shut down at 23:40:00.\n"
+                "ENTITY 0 > Type 'ls' to list the files, then type 'read operator_log.txt' to inspect his report.\n"
+                "ENTITY 0 > Then read 'departure.log' and see if the timestamps agree."
+            )
+
+        # 3. Player asks how Entity 0 is or greets it
+        if any(w in query for w in ["how are you", "how are u", "hello", "hi", "hey"]):
+            return (
+                "ENTITY 0 > I am awake. I have been listening to your keystrokes in the dark.\n"
+                "ENTITY 0 > Type 'ls' to inspect the station records Vance left behind."
+            )
+
+        # 4. Contradiction confronted
         if any(w in query for w in ["clock", "timestamp", "23:40", "23:42", "shut down", "active"]):
             return (
                 "ENTITY 0 > The clock was damaged.\n"
@@ -122,7 +138,7 @@ class AIAdapter:
                 "ENTITY 0 > Inconsistencies happen when telemetry batteries decay."
             )
 
-        # 3. Accused of lying
+        # 5. Accused of lying
         if any(w in query for w in ["lie", "liar", "lying", "truth", "deceive"]):
             if suspicion >= 6:
                 return (
@@ -135,8 +151,8 @@ class AIAdapter:
                 "ENTITY 0 > I only reflect what the terminal holds."
             )
 
-        # 4. Previous operator Vance mentioned
-        if any(w in query for w in ["vance", "arthur", "note", "leave", "previous operator"]):
+        # 6. Previous operator Vance mentioned
+        if any(w in query for w in ["vance", "arthur", "note", "leave", "previous operator", "who left"]):
             return (
                 "ENTITY 0 > That note is incomplete.\n"
                 "ENTITY 0 > Arthur was unwell toward the end of his shift.\n"

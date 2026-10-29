@@ -101,18 +101,30 @@ class TerminalUI:
         return self.fast_mode
 
     def print_teletype(self, text: str, style: Optional[str] = None, delay: float = 0.015, end: str = "\n") -> None:
-        """Prints text character by character to simulate an old mainframe terminal."""
+        """Prints text character by character to simulate an old mainframe terminal cleanly on all consoles."""
         if self.fast_mode:
             self.console.print(text, style=style, end=end)
             return
 
-        for ch in text:
-            self.console.print(ch, style=style, end="")
+        # Render styling once to prevent console line buffer wrapping bugs
+        with self.console.capture() as capture:
+            self.console.print(text, style=style, end="")
+        rendered = capture.get()
+
+        in_escape = False
+        for ch in rendered:
+            sys.stdout.write(ch)
             sys.stdout.flush()
-            # Random jitter for typewriter feel
-            time.sleep(delay * random.uniform(0.6, 1.4))
-        if end:
-            self.console.print("", end=end)
+            if ch == '\x1b':
+                in_escape = True
+            elif in_escape:
+                if ch in ('m', 'H', 'J', 'K'):
+                    in_escape = False
+            else:
+                time.sleep(delay * random.uniform(0.5, 1.3))
+
+        sys.stdout.write(end)
+        sys.stdout.flush()
 
     def print_system(self, message: str) -> None:
         """Renders a system alert or notification."""
@@ -210,21 +222,27 @@ class TerminalUI:
 
     def display_help(self) -> None:
         """Displays available fictional terminal commands."""
-        help_table = Table(title="ALLOWED TERMINAL COMMANDS", border_style=self.theme["dim"], box=box.ASCII)
-        help_table.add_column("COMMAND", style=f"bold {self.theme['highlight']}")
-        help_table.add_column("DESCRIPTION", style=self.theme["primary"])
+        self.console.print("\n[bold]MISSION OBJECTIVE & HOW TO PLAY:[/bold]")
+        self.console.print("  1. Type: [bold yellow]ls[/bold yellow] to list the station archive files.")
+        self.console.print("  2. Type: [bold yellow]read operator_log.txt[/bold yellow] to view Arthur Vance's shutdown log.")
+        self.console.print("  3. Type: [bold yellow]read departure.log[/bold yellow] to expose contradictory timestamps.")
+        self.console.print("  4. Type: [bold yellow]ask why did you lie?[/bold yellow] (or just type questions directly) to interrogate Entity 0.")
+        self.console.print("  5. Type: [bold yellow]read recovery_note.txt[/bold yellow] to recover Vance's warning.\n")
 
-        help_table.add_row("ls / dir", "List visible virtual archive files")
-        help_table.add_row("read <file>", "Inspect virtual archive file (e.g. read operator_log.txt)")
-        help_table.add_row("ask <text>", "Confront or question Entity 0 in free text")
-        help_table.add_row("status", "Inspect station diagnostics, suspicion, and trust")
-        help_table.add_row("decide", "Access terminal moral choices (when story conditions are met)")
-        help_table.add_row("shutdown", "Attempt terminal shutdown process")
-        help_table.add_row("theme <amber|green|monochrome>", "Change terminal display palette")
-        help_table.add_row("speed", "Toggle fast / reduced-effects mode")
-        help_table.add_row("clear", "Clear terminal screen")
-        help_table.add_row("reset", "Reset persistent memory back to Session 0001")
-        help_table.add_row("quit / exit", "Safely disconnect from terminal bay")
+        help_table = Table(title="ALLOWED TERMINAL COMMANDS (Do not type '<' or '>')", border_style=self.theme["dim"], box=box.ASCII)
+        help_table.add_column("COMMAND", style=f"bold {self.theme['highlight']}")
+        help_table.add_column("EXAMPLE USAGE", style=self.theme["primary"])
+
+        help_table.add_row("ls", "ls")
+        help_table.add_row("read filename", "read operator_log.txt")
+        help_table.add_row("ask question", "ask what happened to Vance? (or type question directly)")
+        help_table.add_row("status", "status")
+        help_table.add_row("decide", "decide")
+        help_table.add_row("theme name", "theme halloween (or green, amber, monochrome)")
+        help_table.add_row("speed", "speed (toggles instant text rendering)")
+        help_table.add_row("clear", "clear")
+        help_table.add_row("reset", "reset (wipes save back to Session 0001)")
+        help_table.add_row("quit", "quit")
 
         self.console.print(help_table)
 

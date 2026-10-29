@@ -113,8 +113,9 @@ class GameSession:
 
     def handle_read(self, filename: str) -> None:
         """Reads a virtual archive file and triggers narrative mutations."""
+        filename = (filename or "").strip("<>\"' ")
         if not filename:
-            self.ui.print_system("Usage: read <filename> (e.g. read operator_log.txt)")
+            self.ui.print_system("Usage: read operator_log.txt  (do not type '<' or '>')")
             return
 
         result = self.engine.on_read_file(filename)
@@ -144,8 +145,9 @@ class GameSession:
 
     def handle_ask(self, query: str) -> None:
         """Interacts with Entity 0 via Ollama or atmospheric fallback."""
+        query = (query or "").strip("<>\"' ")
         if not query:
-            self.ui.print_system("Usage: ask <question> (e.g. ask why did you lie?)")
+            self.ui.print_system("Usage: ask why did you lie? (or type your question directly)")
             return
 
         context = self.engine.evaluate_query(query)

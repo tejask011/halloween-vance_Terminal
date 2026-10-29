@@ -87,9 +87,25 @@ def parse_and_validate_command(command_str: str) -> Tuple[Optional[str], str]:
     if not cleaned:
         return (None, "")
     
+    # Handle inputs without spaces like ask<how are u?> or read<operator_log.txt>
+    for prefix in ["ask<", "read<", "cat<", "open<", "view<"]:
+        if cleaned.lower().startswith(prefix):
+            cleaned = prefix[:-1] + " " + cleaned[len(prefix):]
+            break
+
     parts = cleaned.split(maxsplit=1)
     cmd = parts[0].lower()
     args = parts[1].strip() if len(parts) > 1 else ""
+    
+    # Strip literal angle brackets or quotes user might type: <file> or "file"
+    args = args.strip("<>\"' ")
+
+    # If player typed '? something', route to ask; if just '?', route to help
+    if cmd == "?":
+        if args:
+            cmd = "ask"
+        else:
+            cmd = "help"
     
     # Prevent path traversal in arguments
     args = os.path.basename(args.replace("\\", "/")) if cmd in ("read", "cat", "open", "view") else args
