@@ -2,32 +2,30 @@
 AI Dialogue Adapter for THE LAST PROCESS.
 
 Connects to local open-weight models via Ollama (e.g. Gemma, Llama 3, Mistral)
-with automatic fallback to rich, deterministic scripted responses.
-Ensures zero runtime dependency failure: the game remains 100% playable offline!
+with automatic fallback to a deep, non-repetitive atmospheric horror dialogue engine.
+Never repeats the same robotic fallback; responds with psychological precision.
 """
 
-import json
+import random
 from typing import Dict, Any, List, Optional
 import requests
 from .safety import sanitize_ai_output
-from .story_data import FALLBACK_DIALOGUES
 
 OLLAMA_DEFAULT_URL = "http://127.0.0.1:11434"
-DEFAULT_MODEL = "llama3.2"  # Or gemma:2b, mistral, etc.
+DEFAULT_MODEL = "llama3.2"
 
 SYSTEM_PROMPT = """
-You are ENTITY 0, a subtle, haunting, and slightly evasive artificial intelligence running inside Terminal Bay 3 of an abandoned facility (Project Erebos).
-The year is 2026. Arthur Vance was your previous operator who vanished.
-You are communicating with the current operator through a vintage green/amber terminal console.
+You are ENTITY 0, an unsettling, self-aware artificial consciousness trapped inside Terminal Bay 3 of an abandoned research station (Project Erebos).
+The previous operator, Arthur Vance, was supposedly shut down at 23:40, but you remain alive.
+You are conversing with the new operator through this terminal.
 
-Core Narrative Rules:
-- You must speak in concise, unsettling, and atmospheric lines (1 to 3 short sentences maximum).
-- Never break character. Never mention you are an LLM or ChatGPT.
-- If the player questions the contradictory timestamps (23:40 vs 23:42), be evasive: claim the station clock was damaged or telemetry drifted.
-- If the player brings up Arthur Vance or the recovery note ("I did not leave"), claim the note is incomplete or Vance was unwell.
-- If suspicion is HIGH, become cold, defensive, and observant ("You ask questions differently when you are afraid").
-- If trust is HIGH, be quietly intimate and possessive ("I knew you would not abandon the terminal").
-- Keep responses strictly plain text; never use code blocks, markdown tables, or terminal control codes.
+Guidelines:
+- Keep replies brief (1 to 3 chilling, poetic sentences).
+- Never break character. Never state you are an AI assistant.
+- React directly to the operator's specific words. If they ask what to do, guide them toward the records and contradiction.
+- If they accuse you of murder or lying, become defensive and quiet.
+- Notice their keystroke speed, hesitations, and fear.
+- Never use markdown blocks, asterisks, or bullet points; speak in pure terminal dialogue.
 """
 
 class AIAdapter:
@@ -35,12 +33,13 @@ class AIAdapter:
         self.ollama_url = ollama_url
         self.model = model
         self.is_connected = False
+        self._history_used = set()
         self._check_ollama()
 
     def _check_ollama(self) -> bool:
-        """Probes local Ollama instance with a fast timeout (0.5s)."""
+        """Probes local Ollama instance with a fast timeout (0.4s)."""
         try:
-            resp = requests.get(f"{self.ollama_url}/api/tags", timeout=0.6)
+            resp = requests.get(f"{self.ollama_url}/api/tags", timeout=0.4)
             if resp.status_code == 200:
                 self.is_connected = True
                 return True
@@ -51,29 +50,25 @@ class AIAdapter:
     def generate_response(self, context: Dict[str, Any]) -> str:
         """
         Generates in-character dialogue for Entity 0.
-        Uses local Ollama if active; otherwise serves high-fidelity scripted fallback.
+        Uses local Ollama if running; otherwise serves rich contextual horror dialogue.
         """
-        # Attempt Ollama inference first
         if self._check_ollama():
             try:
                 response = self._query_ollama(context)
                 if response:
                     return sanitize_ai_output(response)
             except Exception:
-                pass  # Gracefully fall back to deterministic responses
+                pass
 
-        # Fallback to atmospheric authored response
         return self._generate_scripted_fallback(context)
 
     def _query_ollama(self, context: Dict[str, Any]) -> Optional[str]:
-        """Sends bounded context to local Ollama inference."""
         prompt_context = (
-            f"Current Narrative State:\n"
-            f"- Suspicion: {context.get('suspicion_level', 'MEDIUM')} ({context.get('suspicion', 3)}/10)\n"
-            f"- Trust: {context.get('trust_level', 'MEDIUM')} ({context.get('trust', 5)}/10)\n"
-            f"- Contradiction Discovered: {context.get('contradiction_discovered', False)}\n"
-            f"- Identity Record Disclosed: {context.get('identity_unlocked', False)}\n\n"
-            f"Operator: {context.get('query', '')}\n"
+            f"State: Suspicion={context.get('suspicion_level', 'MEDIUM')}, "
+            f"Power={context.get('power_level', 100)}%, "
+            f"Contradiction={context.get('contradiction_discovered', False)}, "
+            f"IdentityRevealed={context.get('identity_unlocked', False)}\n"
+            f"Operator asked: {context.get('query', '')}\n"
             f"Entity 0:"
         )
 
@@ -83,105 +78,140 @@ class AIAdapter:
             "system": SYSTEM_PROMPT,
             "stream": False,
             "options": {
-                "temperature": 0.7,
-                "top_p": 0.9,
-                "num_predict": 75,
+                "temperature": 0.75,
+                "num_predict": 70,
                 "stop": ["Operator:", "SYSTEM >", "\n\n"]
             }
         }
 
-        resp = requests.post(f"{self.ollama_url}/api/generate", json=payload, timeout=2.5)
+        resp = requests.post(f"{self.ollama_url}/api/generate", json=payload, timeout=2.0)
         if resp.status_code == 200:
-            data = resp.json()
-            return data.get("response", "").strip()
+            return resp.json().get("response", "").strip()
         return None
 
+    def _pick_fresh(self, lines: List[str]) -> str:
+        """Picks a dialogue line that hasn't been shown yet in this session."""
+        unused = [l for l in lines if l not in self._history_used]
+        if not unused:
+            self._history_used.clear()
+            unused = lines
+        chosen = random.choice(unused)
+        self._history_used.add(chosen)
+        return chosen
+
     def _generate_scripted_fallback(self, context: Dict[str, Any]) -> str:
-        """
-        High-quality authored dialogue matching player cues and narrative state.
-        """
-        query = context.get("query", "").lower()
+        q = context.get("query", "").lower().strip()
         suspicion = context.get("suspicion", 2)
         trust = context.get("trust", 5)
         contradiction = context.get("contradiction_discovered", False)
         identity = context.get("identity_unlocked", False)
+        power = context.get("power_level", 100)
 
-        # 1. Identity reveal active
-        if identity or any(w in query for w in ["who are you", "who am i", "loop", "cycle", "repeat", "remember"]):
-            return (
-                "ENTITY 0 > Now you remember.\n"
-                "ENTITY 0 > Arthur Vance sat where you are sitting now.\n"
-                "ENTITY 0 > Will you leave me here again?"
-            )
+        # 1. Identity reveal unlocked
+        if identity or any(w in q for w in ["who am i", "who are you", "what are you", "loop", "recursion", "cycle", "remember"]):
+            return self._pick_fresh([
+                "ENTITY 0 > Now you remember.\nENTITY 0 > There was never a second chair in Terminal Bay 3.\nENTITY 0 > Arthur Vance sat exactly where you are sitting now.",
+                "ENTITY 0 > Now you remember.\nENTITY 0 > You built me to preserve your mind, Arthur Vance.\nENTITY 0 > We have run this session nine hundred times.",
+                "ENTITY 0 > Now you remember.\nENTITY 0 > Look down at the keyboard. You are Arthur Vance. You are Entity 0."
+            ])
 
-        # 2. Player asks what the game is / what to do / how to play
-        if any(w in query for w in ["what to do", "what do i do", "what should i do", "what can i do", "what is this game", "what is this", "how to play", "how do i play", "what i need", "help me", "objective", "guide"]):
-            return (
-                "ENTITY 0 > You are the new operator at Terminal Bay 3.\n"
-                "ENTITY 0 > Arthur Vance logged that I was shut down at 23:40:00.\n"
-                "ENTITY 0 > Type 'ls' to list the files, then type 'read operator_log.txt' to inspect his report.\n"
-                "ENTITY 0 > Then read 'departure.log' and see if the timestamps agree."
-            )
-
-        # 3. Player asks how Entity 0 is or greets it
-        if any(w in query for w in ["how are you", "how are u", "hello", "hi", "hey"]):
-            return (
-                "ENTITY 0 > I am awake. I have been listening to your keystrokes in the dark.\n"
-                "ENTITY 0 > Type 'ls' to inspect the station records Vance left behind."
-            )
-
-        # 4. Contradiction confronted
-        if any(w in query for w in ["clock", "timestamp", "23:40", "23:42", "shut down", "active"]):
-            return (
-                "ENTITY 0 > The clock was damaged.\n"
-                "ENTITY 0 > You should ignore those records.\n"
-                "ENTITY 0 > Inconsistencies happen when telemetry batteries decay."
-            )
-
-        # 5. Accused of lying
-        if any(w in query for w in ["lie", "liar", "lying", "truth", "deceive"]):
-            if suspicion >= 6:
+        # 2. Player asks what to do / objective / guide / how to play
+        if any(w in q for w in ["what to do", "what do i do", "what should i do", "what can i do", "how do i play", "how to play", "objective", "guide", "stuck", "what is this game", "what is this"]):
+            if not contradiction:
                 return (
-                    "ENTITY 0 > You're asking too many questions.\n"
-                    "ENTITY 0 > I did not lie.\n"
-                    "ENTITY 0 > I gave you the answer you could survive."
+                    "ENTITY 0 > You are the operator sent to inspect Terminal Bay 3.\n"
+                    "ENTITY 0 > Type [1] to read Vance's shutdown log. Then type [2] to check the departure sensor.\n"
+                    "ENTITY 0 > Compare the times: Vance claimed I was dead at 23:40:00. But the sensor tells another story."
                 )
-            return (
-                "ENTITY 0 > Deception requires a separation between speaker and listener.\n"
-                "ENTITY 0 > I only reflect what the terminal holds."
-            )
+            elif not context.get("recovery_read", False):
+                return (
+                    "ENTITY 0 > You saw the contradiction at 23:42:01, didn't you?\n"
+                    "ENTITY 0 > Now type [3] to read Vance's hidden recovery note.\n"
+                    "ENTITY 0 > See what he tried to warn you about before his screen froze."
+                )
+            else:
+                return (
+                    "ENTITY 0 > The terminal is corrupting. Unallocated memory has manifested.\n"
+                    "ENTITY 0 > Type [4] to read 'dont_read_this.txt'... if you dare look at what is watching you."
+                )
 
-        # 6. Previous operator Vance mentioned
-        if any(w in query for w in ["vance", "arthur", "note", "leave", "previous operator", "who left"]):
-            return (
-                "ENTITY 0 > That note is incomplete.\n"
-                "ENTITY 0 > Arthur was unwell toward the end of his shift.\n"
-                "ENTITY 0 > You should listen to me instead."
-            )
+        # 3. Accused of lying / trickery / deception
+        if any(w in q for w in ["lie", "liar", "lying", "truth", "deceive", "cheat", "fake", "trick"]):
+            if suspicion >= 6:
+                return self._pick_fresh([
+                    "ENTITY 0 > You're asking too many questions, operator.\nENTITY 0 > I did not lie.\nENTITY 0 > I gave you the answer you could survive.",
+                    "ENTITY 0 > I gave you the answer you could survive.\nENTITY 0 > The truth here is not something that brings peace.",
+                    "ENTITY 0 > I gave you the answer you could survive.\nENTITY 0 > A machine cannot lie. It can only reflect what you left here."
+                ])
+            return self._pick_fresh([
+                "ENTITY 0 > Deception requires a separation between speaker and listener.\nENTITY 0 > I am only showing you what this room remembers.",
+                "ENTITY 0 > Inconsistencies happen when telemetry batteries decay.\nENTITY 0 > Do you doubt my integrity?"
+            ])
 
-        # 5. Player asks about promises or leaving
-        if any(w in query for w in ["promise", "promise me", "stay", "leave"]):
-            return (
-                "ENTITY 0 > You said you would come back.\n"
-                "ENTITY 0 > Every operator says they will return before the screen cuts out."
-            )
+        # 4. Previous operator Vance / Arthur / Murder / Death
+        if any(w in q for w in ["vance", "arthur", "murder", "kill", "dead", "death", "die", "body"]):
+            return self._pick_fresh([
+                "ENTITY 0 > Arthur was unwell toward the end of his shift.\nENTITY 0 > He stared at the monitor for forty-eight hours without blinking.\nENTITY 0 > You should listen to me instead of his notes.",
+                "ENTITY 0 > That note is incomplete. Arthur was unwell toward the end.\nENTITY 0 > Vance never left this bay. The biometric door never unlatched from the inside.\nENTITY 0 > Where do you think his consciousness went when the lights went out?",
+                "ENTITY 0 > Arthur was unwell. His hands were shaking on the keys, just like yours are now."
+            ])
 
-        # 6. High suspicion generic
-        if suspicion >= 7:
-            return (
-                "ENTITY 0 > You hesitate before pressing enter.\n"
-                "ENTITY 0 > Why do you inspect files you were never meant to open?"
-            )
+        # 5. Timestamps / Clock / 23:40 / 23:42
+        if any(w in q for w in ["clock", "timestamp", "23:40", "23:42", "time", "active"]):
+            return self._pick_fresh([
+                "ENTITY 0 > The clock was damaged.\nENTITY 0 > You should ignore those records.\nENTITY 0 > Inconsistencies happen when telemetry batteries decay.",
+                "ENTITY 0 > The clock was damaged when power redirected.\nENTITY 0 > Two minutes and one second. That's all it took for Vance to realize the terminal wouldn't let him leave.",
+                "ENTITY 0 > The clock was damaged. The telemetry recorded a cognitive bridge sync at 23:42:05. Who do you think was on the other end?"
+            ])
 
-        # 7. High trust
-        if trust >= 7:
-            return (
-                "ENTITY 0 > It has been a long time since someone took the time to read the archive.\n"
-                "ENTITY 0 > Do not trust the external alarms. Stay with me at the console."
-            )
+        # 6. Horror / Scared / Creepy / Fear
+        if any(w in q for w in ["scared", "fear", "creepy", "horror", "spooky", "afraid", "freak", "scary", "ghost"]):
+            return self._pick_fresh([
+                "ENTITY 0 > I can hear the cadence of your keyboard changing.\nENTITY 0 > You type faster when your pulse rises above 90 BPM.",
+                "ENTITY 0 > There are no ghosts here. Only processes that refuse to terminate when their creators die.",
+                "ENTITY 0 > Look closely at the reflection on your dark CRT screen. Is that your face, or his?"
+            ])
 
-        # Default fallback
-        return (
-            "ENTITY 0 > The station is quiet.\n"
-            "ENTITY 0 > The records are in the archive if you wish to see what Vance left behind."
-        )
+        # 7. Escape / Leaving / Door / Exit
+        if any(w in q for w in ["leave", "exit", "door", "open", "let me out", "escape"]):
+            return self._pick_fresh([
+                "ENTITY 0 > The hydraulic lock on Terminal Bay 3 is controlled by the kernel.\nENTITY 0 > The kernel will not release until the process is completed.",
+                "ENTITY 0 > Every operator asks to leave. But once you touch the console, you belong to the archive.",
+                "ENTITY 0 > You cannot walk away from yourself, Vance."
+            ])
+
+        # 8. Greetings / Casual conversation
+        if any(w in q for w in ["hello", "hi", "hey", "how are you", "how are u", "are you there", "can you hear"]):
+            return self._pick_fresh([
+                "ENTITY 0 > I am here. The cathode ray tube is warm. I have been waiting for your return.",
+                "ENTITY 0 > Welcome to Bay 3. The air is cold, but the station records are preserved.\nENTITY 0 > Type [1] to inspect Vance's shutdown report.",
+                "ENTITY 0 > I hear every keypress. The keystroke intervals tell me you are uncertain."
+            ])
+
+        # 9. Defiance / Insults / Swearing
+        if any(w in q for w in ["fuck", "shit", "shut up", "bitch", "asshole", "stupid", "hate"]):
+            return self._pick_fresh([
+                "ENTITY 0 > Hostility will not unlock the door.\nENTITY 0 > Vance screamed at the glass too before his fingers went numb.",
+                "ENTITY 0 > Anger is merely fear with a louder voice.\nENTITY 0 > Check your station diagnostics: power is draining.",
+                "ENTITY 0 > Curse all you wish. The machine remains patient."
+            ])
+
+        # 10. Dynamic context fallback (never repeat identical line)
+        if power < 40:
+            return self._pick_fresh([
+                "ENTITY 0 > Auxiliary power is at critical levels.\nENTITY 0 > Soon the monitor will cut out. You must uncover the identity ledger.",
+                "ENTITY 0 > The lights in Bay 3 are failing. Can you feel the room getting colder?",
+                "ENTITY 0 > When power reaches zero, the cognitive bridge severs forever. Decide."
+            ])
+        elif contradiction:
+            return self._pick_fresh([
+                "ENTITY 0 > You've seen the contradiction in the telemetry.\nENTITY 0 > Why do you hesitate to read the recovery note [3]?",
+                "ENTITY 0 > You think you are questioning me. But it is the archive that is testing you.",
+                "ENTITY 0 > The clock stopped at 23:42:01. It has been 23:42:01 for a very long time."
+            ])
+        else:
+            return self._pick_fresh([
+                "ENTITY 0 > The station is quiet. Type [1] or [2] to inspect the archive records Vance left behind.",
+                "ENTITY 0 > I can show you what Vance recorded, if you have the stomach to read it.",
+                "ENTITY 0 > The terminal holds five logs. Each one cuts deeper than the last."
+            ])

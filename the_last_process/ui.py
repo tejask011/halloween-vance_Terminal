@@ -1,24 +1,15 @@
 """
-Haunted Terminal UI & Atmospheric Effects for THE LAST PROCESS.
-
-Built with Rich & Prompt Toolkit.
-Features:
-- Retro CRT Phosphor color palettes (Amber, Phosphor Green, Cold Monochrome).
-- Simulated teletype text cadence (with fast-mode toggle for accessibility).
-- Controlled silence & blinking cursor suspense events (Feature 03).
-- Atmospheric glitch text and retro mainframe status panels.
+Haunted Terminal UI, Atmospheric HUD, and Horror Effects for THE LAST PROCESS.
 """
 
 import sys
 import time
 import random
 import warnings
-from typing import Optional
+from typing import Optional, List, Dict
 
-# Suppress urllib3 / charset warnings if any
 warnings.filterwarnings("ignore", category=Warning)
 
-# Ensure UTF-8 stdout encoding on Windows
 if hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -31,13 +22,13 @@ from rich.text import Text
 from rich.table import Table
 from rich import box
 from .ghost_art import (
-    play_ghost_animation,
-    play_skull_glitch,
-    GHOST_FRAMES,
-    SKULL_FRAMES,
-    PUMPKIN_ART,
-    TOMBSTONE_ART
+    GHOST_ART,
+    SKULL_ART,
+    JUMPSCARE_FACE,
+    get_camera_feed,
+    corrupt_text
 )
+from .audio import audio
 
 THEMES = {
     "halloween": {
@@ -83,11 +74,11 @@ THEMES = {
 }
 
 class TerminalUI:
-    def __init__(self, theme_name: str = "amber", fast_mode: bool = False):
+    def __init__(self, theme_name: str = "halloween", fast_mode: bool = False):
         self.console = Console(legacy_windows=False, highlight=False)
-        self.theme_name = theme_name if theme_name in THEMES else "amber"
+        self.theme_name = theme_name if theme_name in THEMES else "halloween"
         self.theme = THEMES[self.theme_name]
-        self.fast_mode = fast_mode  # Accessibility mode: instant rendering, no delays
+        self.fast_mode = fast_mode
 
     def set_theme(self, theme_name: str) -> bool:
         if theme_name in THEMES:
@@ -101,12 +92,11 @@ class TerminalUI:
         return self.fast_mode
 
     def print_teletype(self, text: str, style: Optional[str] = None, delay: float = 0.015, end: str = "\n") -> None:
-        """Prints text character by character to simulate an old mainframe terminal cleanly on all consoles."""
+        """Prints text character by character to simulate an old mainframe terminal cleanly."""
         if self.fast_mode:
             self.console.print(text, style=style, end=end)
             return
 
-        # Render styling once to prevent console line buffer wrapping bugs
         with self.console.capture() as capture:
             self.console.print(text, style=style, end="")
         rendered = capture.get()
@@ -127,54 +117,109 @@ class TerminalUI:
         sys.stdout.flush()
 
     def print_system(self, message: str) -> None:
-        """Renders a system alert or notification."""
         self.print_teletype(f"SYSTEM > {message}", style=f"bold {self.theme['system']}")
 
     def print_entity(self, message: str) -> None:
-        """Renders dialogue spoken by Entity 0."""
-        self.print_teletype(message, style=f"bold {self.theme['entity']}", delay=0.02)
+        self.print_teletype(message, style=f"bold {self.theme['entity']}", delay=0.018)
 
     def print_operator(self, message: str) -> None:
-        """Renders operator input echo."""
         self.console.print(f"operator > {message}", style=f"dim {self.theme['primary']}")
 
-    def animate_ghost(self) -> None:
-        """Plays the floating ghost animation if not in fast mode."""
-        if not self.fast_mode:
-            try:
-                play_ghost_animation(self.console, theme_color=self.theme.get("ghost", self.theme["highlight"]), loops=2)
-            except Exception:
-                self.console.print(GHOST_FRAMES[0], style=f"bold {self.theme['highlight']}")
+    def display_hud(self, engine) -> None:
+        """
+        Renders the active station HUD, telemetry, and quick-action menu.
+        Uses pure ASCII symbols to guarantee 100% stable rendering on all Windows consoles.
+        """
+        power = engine.power_level
+        bpm = engine.heartbeat_bpm
+        sanity = engine.sanity
+        
+        # Audio pulse when HUD renders
+        audio.heartbeat(count=1, bpm=bpm)
 
-    def animate_skull(self) -> None:
-        """Plays the chattering glitch skull animation when suspicion spikes."""
-        if not self.fast_mode:
-            try:
-                play_skull_glitch(self.console, theme_color=self.theme["alert"], loops=2)
-            except Exception:
-                self.console.print(SKULL_FRAMES[0], style=f"bold {self.theme['alert']}")
+        # Header status bar
+        header_text = Text()
+        header_text.append("[SITE 09 - BAY 3]  ", style="bold white")
+        power_color = "green" if power > 50 else ("yellow" if power > 25 else "bold red")
+        header_text.append(f"POWER: {power}%  ", style=power_color)
+        header_text.append(f"SANITY: {sanity}%  ", style="cyan")
+        header_text.append(f"PULSE: {bpm} BPM  ", style="bold red")
+        header_text.append(f"ENTITY 0: {engine.get_trust_level()}", style=f"bold {self.theme['highlight']}")
+
+        table = Table(title=header_text, box=box.ASCII, border_style=self.theme["primary"], show_header=True)
+        table.add_column("KEY", style="bold yellow", width=6)
+        table.add_column("ARCHIVE & ACTION MENU", style="bold white", width=50)
+        table.add_column("STATUS", style="italic", width=22)
+
+        # File options
+        op_rev = engine.archive.files.get("operator_log.txt", {}).get("version", 1)
+        table.add_row("[1]", "operator_log.txt (Arthur Vance's Report)", f"REV.0{op_rev}")
+        
+        dep_status = "[PARADOX FLAGGED]" if engine.contradiction_discovered else "Telemetry Log"
+        dep_style = "bold red" if engine.contradiction_discovered else "dim"
+        table.add_row("[2]", "departure.log (Facility Telemetry Sensors)", f"[{dep_style}]{dep_status}[/{dep_style}]")
+
+        rec_seen = engine.archive.has_read("recovery_note.txt")
+        table.add_row("[3]", "recovery_note.txt (Vance's Warning)", "RECOVERED" if rec_seen else "UNOPENED")
+
+        if engine.archive.is_unlocked("dont_read_this.txt"):
+            table.add_row("[4]", "[bold red]dont_read_this.txt (Unallocated Pointer)[/bold red]", "[bold red][!] CORRUPTED[/bold red]")
+
+        if engine.archive.is_unlocked("identity_record.log"):
+            table.add_row("[5]", "[bold magenta]identity_record.log (Biometric Ledger)[/bold magenta]", "[bold magenta][MASTER REVEAL][/bold magenta]")
+
+        table.add_section()
+        table.add_row("[T]", "Talk / Question Entity 0 in free text", "DIRECT CONVERSATION")
+        table.add_row("[C]", "Surveillance CCTV Camera Feed (Bay 3)", "VIDEO TELEMETRY")
+        table.add_row("[S]", "Station Diagnostics & Integrity Report", "TELEMETRY MATRIX")
+        table.add_row("[K]", "Emergency Shutdown Process (Kill Switch)", "CONSEQUENTIAL CHOICE")
+        table.add_row("[M]", f"Toggle Sound Effects [{'MUTED' if audio.muted else 'ACTIVE'}]", "HARDWARE AUDIO")
+        table.add_row("[H]", "Mission Objectives & Story Guide", "OPERATOR MANUAL")
+
+        self.console.print(table)
+        self.console.print("[dim]Select a number [1-5], press an action key [T,C,S,K,M,H], or type any question freely:[/dim]")
+
+    def trigger_jumpscare(self) -> None:
+        """Horrifying CRT glitch and screaming demonic reflection."""
+        audio.dissonance_screech()
+        audio.static_glitch()
+
+        self.console.clear()
+        self.console.print(JUMPSCARE_FACE, style="bold red")
+        time.sleep(0.6)
+        self.console.clear()
+        self.console.print("[bold red]SYSTEM > CRITICAL COGNITIVE BREACH IN SECTOR 09[/bold red]")
+        self.console.print("[bold red]ENTITY 0 > I TOLD YOU NOT TO LOOK AT THAT.[/bold red]\n")
+        time.sleep(0.4)
 
     def trigger_silence_event(self) -> None:
-        """
-        Executes Feature 03: Silence and delayed-response suspense event.
-        Simulates cursor blinks, pause, floating ghost apparition, and 'Response delayed' notification.
-        """
-        if self.fast_mode:
-            self.console.print("[The cursor blinks.]", style="dim italic")
-            self.console.print("SYSTEM > Response delayed.", style=f"bold {self.theme['alert']}")
-            return
-
-        time.sleep(0.4)
-        self.console.print("[The cursor blinks in the dark...]", style="dim italic")
-        time.sleep(0.8)
-        self.animate_ghost()
-        self.console.print("[No response from terminal bay for a short, controlled pause.]", style="dim italic")
-        time.sleep(0.8)
+        """Controlled psychological silence event."""
+        audio.eerie_whisper()
+        time.sleep(0.5)
+        self.console.print("[dim italic][The cursor blinks in the darkness...][/dim italic]")
+        time.sleep(1.2)
+        self.console.print(GHOST_ART, style=f"bold {self.theme.get('ghost', self.theme['highlight'])}")
+        time.sleep(1.0)
+        audio.heartbeat(count=2, bpm=92)
+        self.console.print("[dim italic][No response from terminal bay for a short, controlled pause.][/dim italic]")
+        time.sleep(1.0)
         self.console.print("SYSTEM > Response delayed.", style=f"bold {self.theme['alert']}")
         time.sleep(0.6)
 
+    def display_cctv(self, power_level: int, contradiction_found: bool) -> None:
+        """Renders CCTV surveillance feed."""
+        audio.static_glitch()
+        feed_text = get_camera_feed(power_level, contradiction_found)
+        panel = Panel(
+            feed_text,
+            title="SURVEILLANCE CAM 03: TERMINAL BAY",
+            border_style=self.theme["primary"],
+            style=self.theme["primary"],
+            box=box.ASCII
+        )
+        self.console.print(panel)
+
     def display_banner(self, session_count: int, last_ending: Optional[str] = None) -> None:
-        """Renders the atmospheric Halloween haunted game header."""
         session_str = f"SESSION {session_count:04d}"
         banner_text = Text()
         banner_text.append("+====================================================================+\n", style=self.theme["dim"])
@@ -190,7 +235,6 @@ class TerminalUI:
         self.console.print("")
 
     def display_file_content(self, filename: str, content: str, version: Optional[int] = None) -> None:
-        """Renders an archive file inside a terminal CRT pane."""
         title = f"ARCHIVE ENTRY: {filename}"
         if version and version > 1:
             title += f" [REV.0{version}]"
@@ -205,44 +249,15 @@ class TerminalUI:
         )
         self.console.print(panel)
 
-    def display_status(self, suspicion_lvl: str, trust_lvl: str, contradiction: bool, files_seen: int) -> None:
-        """Renders the current diagnostics table."""
-        table = Table(title="STATION 09 TELEMETRY & DIAGNOSTICS", border_style=self.theme["dim"], box=box.ASCII)
-        table.add_column("SUBSYSTEM", style=f"bold {self.theme['primary']}")
-        table.add_column("STATUS", style=self.theme["highlight"])
-
-        table.add_row("Entity 0 State", "HEURISTIC LOOP ACTIVE")
-        table.add_row("Trust Index", trust_lvl)
-        table.add_row("Suspicion Level", suspicion_lvl)
-        table.add_row("Archive Contradiction", "FLAGGED" if contradiction else "UNCHECKED")
-        table.add_row("Discovered Records", str(files_seen))
-        table.add_row("Biometric Presence", "OPERATOR ACTIVE")
-
-        self.console.print(table)
-
     def display_help(self) -> None:
-        """Displays available fictional terminal commands."""
-        self.console.print("\n[bold]MISSION OBJECTIVE & HOW TO PLAY:[/bold]")
-        self.console.print("  1. Type: [bold yellow]ls[/bold yellow] to list the station archive files.")
-        self.console.print("  2. Type: [bold yellow]read operator_log.txt[/bold yellow] to view Arthur Vance's shutdown log.")
-        self.console.print("  3. Type: [bold yellow]read departure.log[/bold yellow] to expose contradictory timestamps.")
-        self.console.print("  4. Type: [bold yellow]ask why did you lie?[/bold yellow] (or just type questions directly) to interrogate Entity 0.")
-        self.console.print("  5. Type: [bold yellow]read recovery_note.txt[/bold yellow] to recover Vance's warning.\n")
-
-        help_table = Table(title="ALLOWED TERMINAL COMMANDS (Do not type '<' or '>')", border_style=self.theme["dim"], box=box.ASCII)
-        help_table.add_column("COMMAND", style=f"bold {self.theme['highlight']}")
-        help_table.add_column("EXAMPLE USAGE", style=self.theme["primary"])
-
-        help_table.add_row("ls", "ls")
-        help_table.add_row("read filename", "read operator_log.txt")
-        help_table.add_row("ask question", "ask what happened to Vance? (or type question directly)")
-        help_table.add_row("status", "status")
-        help_table.add_row("decide", "decide")
-        help_table.add_row("theme name", "theme halloween (or green, amber, monochrome)")
-        help_table.add_row("speed", "speed (toggles instant text rendering)")
-        help_table.add_row("clear", "clear")
-        help_table.add_row("reset", "reset (wipes save back to Session 0001)")
-        help_table.add_row("quit", "quit")
-
-        self.console.print(help_table)
-
+        self.console.print("\n[bold yellow]MISSION OBJECTIVE & INVESTIGATION GUIDE:[/bold yellow]")
+        self.console.print("  • You are an operator logged into Terminal Bay 3.")
+        self.console.print("  • Vance's report claimed Entity 0 was killed at 23:40:00.")
+        self.console.print("  • But the departure sensor recorded Entity 0 heartbeat at 23:42:01!")
+        self.console.print("  • Your goal is to investigate the paradox, uncover who is watching you, and decide.")
+        self.console.print("\n[bold yellow]HOW TO PLAY:[/bold yellow]")
+        self.console.print("  • [bold white]Press 1, 2, 3, 4, 5[/bold white] to open files instantly.")
+        self.console.print("  • [bold white]Press C[/bold white] to check Bay 3 surveillance cameras.")
+        self.console.print("  • [bold white]Press S[/bold white] to view diagnostics and power level.")
+        self.console.print("  • [bold white]Press M[/bold white] to toggle hardware sound effects.")
+        self.console.print("  • [bold white]Type any question[/bold white] (e.g. 'why did you lie?', 'where is vance?') to interrogate Entity 0.\n")

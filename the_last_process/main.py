@@ -12,9 +12,14 @@ def main():
     )
     parser.add_argument(
         "--theme",
-        choices=["amber", "green", "monochrome"],
-        default="amber",
-        help="Terminal color theme (default: amber)"
+        choices=["halloween", "amber", "green", "monochrome"],
+        default="halloween",
+        help="Terminal color theme (default: halloween)"
+    )
+    parser.add_argument(
+        "--mute",
+        action="store_true",
+        help="Mute terminal audio effects"
     )
     parser.add_argument(
         "--fast",
@@ -34,7 +39,7 @@ def main():
 
     args = parser.parse_args()
 
-    session = GameSession(theme=args.theme, fast_mode=args.fast, model=args.model)
+    session = GameSession(theme=args.theme, fast_mode=args.fast, model=args.model, mute=args.mute)
     if args.reset:
         session.handle_reset()
 

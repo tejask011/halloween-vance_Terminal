@@ -23,13 +23,14 @@ For **Week 4 of the Hacktoberfest 2026 DEV Challenge ("Ghost in the Machine")**,
 
 ## 💡 What I Built
 
-**THE LAST PROCESS** is a haunted terminal simulation available both as a **rich Web CRT Terminal (powered by `@xterm/xterm`)** and a **Python CLI**. It connects to local open-weight models via **Ollama** (e.g. `gemma:2b`, `llama3.2`, or `mistral`) to give life to **Entity 0**—an evasive heuristic monitor trapped in an abandoned research station console.
+**THE LAST PROCESS** is a 100% pure, native terminal horror game built in Python using `rich` and `prompt_toolkit`. It connects to local open-weight models via **Ollama** (e.g. `gemma:2b`, `llama3.2`, or `mistral`) to give life to **Entity 0**—an evasive heuristic monitor trapped in an abandoned research station console.
 
-Instead of generic text dumps, the game delivers psychological dread and authentic Halloween atmosphere:
-- **Haunted CRT Web Terminal**: Built with `@xterm/xterm`, featuring physical curved glass shaders, scanlines, chromatic aberration, and screen shake on suspense moments.
-- **Ghost Apparition Animations**: Floating ethereal ghosts that glide across the CRT monitor, and glowing red eyes that blink from the dark corners.
-- **Live Sound Synthesizer (Web Audio API)**: Self-contained ambient reactor hum, CRT capacitor whine, mechanical key clicks, and ghost wails on silence events.
-- **Animated ASCII Ghost Apparitions in CLI**: Multi-frame animated floating ghosts and chattering skull glitch animations in the native terminal.
+Instead of demanding users blindly type long bash paths, the game delivers an authentic interactive terminal experience:
+- **Interactive Terminal HUD**: Instantly navigate files and actions using number keys (`[1]` to `[5]`) or direct conversation.
+- **Hardware-Level Terminal Audio (Synthesized via `winsound`)**: Psychological heartbeat pulses, electric capacitor static, flatlines, and dissonance screeches directly from your speakers.
+- **ASCII CCTV Surveillance Cameras (`[C]`)**: Inspect live sensor feeds of Terminal Bay 3—where an anomalous figure appears behind your console as power drains.
+- **Power & Sanity Mechanics**: Station power drains from 100% to 12% as you uncover forbidden records, accelerating your pulse to 135 BPM and triggering emergency lighting.
+- **Jumpscare Reflections & Screen Glitches**: Sudden CRT anomalies and screaming reflections in unallocated memory sectors.
 - **Files that rewrite themselves** when you reread them after discovering new evidence.
 - **The terminal itself lying to you**—reporting file counts that do not match the directory listing, and manifesting forbidden files.
 - **Contradictory timestamps** where telemetry logs claim the entity was killed minutes before it logged an operator's departure.

@@ -60,54 +60,49 @@ Designed from the ground up under strict safety principles:
 
 ---
 
-## 🚀 Quickstart & How to Run
+## 🚀 Quickstart & How to Play (100% Pure Terminal CLI)
 
-You can experience the game in **two ways**:
-1. **Haunted Web CRT Terminal (Recommended)**: Powered by `@xterm/xterm`, featuring physical curved glass CRT shaders, scanlines, floating ethereal canvas ghosts, glowing red eyes in the dark, screen shake, and Web Audio synthesizers!
-2. **Terminal CLI**: Native terminal experience with live multi-frame ASCII ghost animations and retro phosphor color palettes.
+No web server or localhost needed. Everything runs natively inside your terminal with real hardware audio synthesis, ASCII surveillance cameras, and interactive controls!
 
----
-
-### Option 1: Haunted Web CRT Terminal (`@xterm/xterm`)
+### 1. Requirements & Setup
 ```bash
-# Start the local server
-npm start
+# Clone or navigate to the repository
+cd DEV4
+
+# Install Python requirements
+pip install -r requirements.txt
 ```
-Then open your browser at **`http://localhost:3000`**!
-- Click **AUDIO: MUTED** in the upper right to enable the ambient reactor hum, CRT capacitor whine, and typing sounds.
-- Switch themes between **Phosphor Green**, **Amber Mainframe**, and **🎃 Halloween**.
-- Watch ghostly apparitions glide across the CRT glass when Entity 0 lies or when you uncover contradictions!
 
----
-
-### Option 2: Terminal CLI (Python)
+### 2. Launching the Game
 ```bash
-# Standard launch with Halloween Haunted Bay aesthetic & animated ASCII ghosts
-python run.py --theme halloween
+# Standard launch (Halloween theme with hardware heartbeat audio & CRT effects)
+python run.py
 
-# Classic Phosphor Green theme
-python run.py --theme green
-
-# Retro Amber Mainframe theme
-python run.py --theme amber
-
-# Fast / Reduced-Effects mode (instant text, no typewriter delays)
+# Launch in Fast Mode (instant text rendering without typewriter delay)
 python run.py --fast
+
+# Launch with sound muted
+python run.py --mute
+
+# Custom theme (halloween, green, amber, monochrome)
+python run.py --theme green
 ```
 
 ---
 
-## 🎮 Terminal Commands
+## 🎮 How to Play (No Long Typing Required!)
 
-| Command | Description |
-| :--- | :--- |
-| `ls` / `dir` | List files visible in the virtual station archive |
-| `read <file>` / `cat <file>` | Read a virtual file (e.g. `read operator_log.txt`) |
-| `ask <question>` | Interrogate or speak to Entity 0 in free text |
-| `status` | View station diagnostics, suspicion level, and trust index |
-| `decide` | Trigger the final moral choice matrix (once evidence is unlocked) |
-| `shutdown` | Initiate process termination sequence |
-| `theme <amber\|green\|monochrome>` | Switch terminal phosphor color scheme |
+The game features an interactive **Terminal HUD**:
+* **Press `1`**: Inspect Vance's shutdown report (`operator_log.txt`).
+* **Press `2`**: Inspect departure sensor logs (`departure.log`) and expose the 23:42:01 timestamp paradox!
+* **Press `3`**: Read Vance's hidden recovery scratchpad (`recovery_note.txt`).
+* **Press `4`**: Breach unallocated memory (`dont_read_this.txt`) — triggers the jumpscare anomaly!
+* **Press `5`**: Decrypt the master biometric identity ledger (`identity_record.log`).
+* **Press `C`**: Access CCTV Surveillance Cameras in Terminal Bay 3.
+* **Press `S`**: Check station diagnostics, auxiliary power, and heart rate monitor.
+* **Press `M`**: Toggle hardware audio effects on/off.
+* **Type freely**: Ask Entity 0 anything directly (e.g. *"why did you lie?"*, *"what happened to Vance?"*, *"what should I do?"*).
+* **Press `K` or `decide`**: Execute the final consequential choice when power collapses!
 | `speed` | Toggle teletype delays / fast-mode |
 | `clear` | Clear terminal screen |
 | `reset` | Wipe save state and reset back to Session 0001 |
