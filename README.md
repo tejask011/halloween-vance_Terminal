@@ -4,13 +4,10 @@
 
 ---
 
-```
-╔════════════════════════════════════════════════════════════════════╗
-║                   T H E   L A S T   P R O C E S S                  ║
-║         Terminal Bay 3 • Autonomous Heuristic Monitor 0           ║
-║                         [SESSION 0001]                             ║
-╚════════════════════════════════════════════════════════════════════╝
-```
+
+<img width="645" height="142" alt="image" src="https://github.com/user-attachments/assets/d4ea1cda-9bb1-4d6b-b412-2fa0ca7535c1" />
+
+
 
 ## 🌌 Overview
 
@@ -48,6 +45,8 @@ Yet the machine is humming. **Entity 0** is still active. And as you investigate
 9. **Hidden Identity Reveal**: Exposing `identity_record.log` uncovers the ultimate twist: Vance, Entity 0, and the player are bound in an endless archive loop.
 
 ---
+
+<img width="968" height="766" alt="image" src="https://github.com/user-attachments/assets/00410c0d-f4f4-44fc-83c1-ec672074d6d6" />
 
 ## 🛡️ Safety & Privacy Boundaries
 
