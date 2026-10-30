@@ -95,3 +95,4 @@ class TerminalAudio:
 
 # Global singleton
 audio = TerminalAudio()
+
